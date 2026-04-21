@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>LSPD ULTIMATE MDT</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Courier New", monospace;
+    background: black;
+    color: #00bfff;
+}
+
+/* LOGIN */
+#login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+}
+
+/* INPUT */
+input {
+    padding: 10px;
+    background: black;
+    border: 1px solid #00bfff;
+    color: #00bfff;
+    margin-top: 10px;
+}
+
+button {
+    padding: 10px;
+    margin-top: 10px;
+    background: #00bfff;
+    border: none;
+    cursor: pointer;
+}
+
+/* SCAN */
+#scan {
+    display: none;
+    padding: 30px;
+}
+
+#bar {
+    width: 100%;
+    height: 20px;
+    border: 1px solid #00bfff;
+}
+
+#progress {
+    width: 0%;
+    height: 100%;
+    background: #00bfff;
+}
+
+/* MAIN */
+#main {
+    display: none;
+}
+
+/* HEADER */
+header {
+    background: #0b1a33;
+    padding: 10px;
+    text-align: center;
+}
+
+/* LAYOUT */
+#layout {
+    display: flex;
+}
+
+#sidebar {
+    width: 220px;
+    background: #081226;
+    height: calc(100vh - 50px);
+}
+
+#sidebar button {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #00bfff;
+    padding: 15px;
+    text-align: left;
+}
+
+#sidebar button:hover {
+    background: #00bfff;
+    color: black;
+}
+
+/* CONTENT */
+#content {
+    flex: 1;
+    padding: 20px;
+}
+
+.card {
+    border: 1px solid #00bfff;
+    padding: 20px;
+    margin-bottom: 15px;
+    background: rgba(0,191,255,0.05);
+}
+
+.mugshot {
+    width: 120px;
+    border: 2px solid #00bfff;
+}
+
+/* SEARCH */
+#searchBox {
+    width: 100%;
+}
+
+/* ALERT */
+.alert {
+    background: red;
+    color: white;
+    padding: 10px;
+    display: none;
+    text-align: center;
+}
+
+/* ANIMATION */
+@keyframes blink {
+    50% {opacity: 0;}
+}
+</style>
+
+<script>
+let pw = "LSPD2026";
+
+/* DATABASE */
+let db = [
+{
+name:"DrMia Hellokitty",
+id:"90027",
+position:"Assistant Chief DU",
+status:"AKTIV",
+info:"Top Kandidat",
+discord:"alexander_1856"
+},
+{
+name:"Max Mustermann",
+id:"11111",
+position:"Officer",
+status:"INAKTIV",
+info:"Testprofil",
+discord:"test"
+}
+];
+
+/* LOGIN */
+function login(){
+let val=document.getElementById("pw").value;
+if(val===pw){
+document.getElementById("login").style.display="none";
+document.getElementById("scan").style.display="block";
+scan();
+}else alert("Falsch!");
+}
+
+/* SCAN */
+let p=0;
+function scan(){
+let i=setInterval(()=>{
+p++;
+document.getElementById("progress").style.width=p+"%";
+if(p>=100){
+clearInterval(i);
+setTimeout(()=>{document.getElementById("scan").style.display="none";
+document.getElementById("main").style.display="block";},500);
+}
+},30);
+}
+
+/* SEARCH */
+function search(){
+let val=document.getElementById("searchBox").value.toLowerCase();
+let out="";
+db.forEach(p=>{
+if(p.name.toLowerCase().includes(val)||p.id.includes(val)){
+out+=`
+<div class="card" onclick="openProfile('${p.id}')">
+<b>${p.name}</b><br>ID: ${p.id}<br>${p.position}
+</div>`;
+}
+});
+document.getElementById("results").innerHTML=out;
+}
+
+/* PROFILE */
+function openProfile(id){
+let p=db.find(x=>x.id==id);
+document.getElementById("profile").innerHTML=`
+<div class="card">
+<img class="mugshot" src="https://via.placeholder.com/120"><br>
+<b>${p.name}</b><br>
+ID: ${p.id}<br>
+Position: ${p.position}<br>
+Status: ${p.status}<br><br>
+Discord: ${p.discord}
+</div>`;
+}
+
+/* ALERT */
+function alarm(){
+let a=document.getElementById("alarm");
+a.style.display="block";
+setTimeout(()=>a.style.display="none",2000);
+
+/* SOUND */
+let ctx=new (window.AudioContext||window.webkitAudioContext)();
+let o=ctx.createOscillator();
+o.connect(ctx.destination);
+o.start();
+o.stop(ctx.currentTime+0.2);
+}
+</script>
+
+</head>
+
+<body>
+
+<!-- LOGIN -->
+
+<div id="login">
+<h2>LSPD ACCESS</h2>
+<input id="pw" type="password" placeholder="PASSWORT">
+<button onclick="login()">LOGIN</button>
+</div>
+
+<!-- SCAN -->
+
+<div id="scan">
+<h2>SCAN...</h2>
+<div id="bar"><div id="progress"></div></div>
+</div>
+
+<!-- MAIN -->
+
+<div id="main">
+
+<header>LSPD MDT ULTIMATE</header>
+
+<div id="layout">
+
+<div id="sidebar">
+<button onclick="document.getElementById('page').innerHTML=document.getElementById('searchPage').innerHTML">SUCHE</button>
+<button onclick="document.getElementById('page').innerHTML=document.getElementById('bewerbungPage').innerHTML">BEWERBUNG</button>
+<button onclick="alarm()">🚨 ALARM</button>
+</div>
+
+<div id="content">
+<div id="alarm" class="alert">!!! ALARM AKTIV !!!</div>
+<div id="page"></div>
+</div>
+
+</div>
+</div>
+
+<!-- SEARCH PAGE -->
+
+<div id="searchPage" style="display:none">
+<input id="searchBox" onkeyup="search()" placeholder="Name oder ID suchen">
+<div id="results"></div>
+<div id="profile"></div>
+</div>
+
+<!-- BEWERBUNG PAGE -->
+
+<div id="bewerbungPage" style="display:none">
+
+<div class="card">
+<h2>PERSON</h2>
+Name: DrMia Hellokitty<br>
+ID: 90027<br>
+Position: Assistant Chief DU<br>
+OOC: Alexander
+</div>
+
+<div class="card">
+<h2>ERFAHRUNG</h2>
+Grand:<br>
+- INF Leitung<br>
+- SOC Leitung<br>
+- Air Force Leitung<br>
+<br>
+Majestic:<br>
+- SWAT<br>
+- CM<br>
+- Assistant Sheriff<br>
+</div>
+
+<div class="card">
+<h2>WARUM ICH</h2>
+Struktur, Teamwork, ruhiges Handeln unter Stress.
+</div>
+
+<div class="card">
+<h2>KONTAKT</h2>
+DC: alexander_1856
+</div>
+
+</div>
+
+</body>
+</html>
